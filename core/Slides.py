@@ -3,7 +3,6 @@ import cv2 as cv
 
 class Loader:
     def __init__(self, capture, idx):
-        self.capture = capture
         self.idx = idx
 
     def sort_slides(self):

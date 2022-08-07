@@ -15,8 +15,8 @@ cam_x = int(os.environ.get('INTEGRATED_FRAME_X'))
 cam_y = int(os.environ.get('INTEGRATED_FRAME_Y'))
 
 capture = cv.VideoCapture(camera_index)
-# capture.set(3, 1280)
-# capture.set(4, 720)
+capture.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
+capture.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 
 async def main():
     global run
@@ -28,9 +28,10 @@ async def main():
 
         status, frame = capture.read()
         integrated_frame = cv.resize(frame, (cam_x, cam_y))
-
-        x, y, _ = matrix
-        slide[0:cam_y, x-cam_x:x] = integrated_frame
+        
+        x, y, z = matrix
+        print(matrix)
+        slide[0:cam_y, x - cam_x:x] = integrated_frame
         
         if status:
             cv.imshow('IT-EXHIBITION', slide)
