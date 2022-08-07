@@ -4,7 +4,7 @@ import cv2 as cv
 
 from dotenv import load_dotenv
 from core.slides import Loader
-
+from core.hand_detector import Detector
 
 current_slide = 0
 run = True
@@ -15,6 +15,8 @@ cam_x = int(os.environ.get('INTEGRATED_FRAME_X'))
 cam_y = int(os.environ.get('INTEGRATED_FRAME_Y'))
 
 capture = cv.VideoCapture(camera_index)
+detector = Detector()
+
 capture.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
 capture.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 
@@ -27,12 +29,15 @@ async def main():
         matrix = slide.shape
 
         status, frame = capture.read()
+        frame = cv.flip(frame, 1)
         integrated_frame = cv.resize(frame, (cam_x, cam_y))
         
         x, y, z = matrix
         print(matrix)
         slide[0:cam_y, x - cam_x:x] = integrated_frame
         
+        frame = await detector.find_hands(frame)
+
         if status:
             cv.imshow('IT-EXHIBITION', slide)
             cv.imshow('Camera View', frame)
