@@ -3,21 +3,35 @@ import asyncio
 import cv2 as cv
 
 from dotenv import load_dotenv
-
+from core.Slides import Loader
 
 load_dotenv()
-capture = cv.VideoCapture(os.environ.get('CAMERA_INDEX'))
-capture.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-capture.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
+camera_index = int(os.environ.get('CAMERA_INDEX'))
+run = True
+current_slide = 0
 
-
+capture = cv.VideoCapture(camera_index)
+capture.set()
 
 async def main():
-    status, frame = capture.read()
-    
-    if status:
-        cv.imshow('Test', frame)
-        cv.waitKey(1)
+    global run
+
+    while run:
+        await Loader.load_slide(current_slide, 'IT-Exhibition')
+        status, frame = capture.read()
+
+        if status:
+            cv.imshow('Camera View', frame)
+            cv.waitKey(1)
+
+        else:
+            print('Error: Cannot read frame')
+
+        if cv.waitKey(1) == ord('q'):
+            run = False
+            capture.release()
+            cv.destroyAllWindows()
+
 
 if __name__ == '__main__':
     asyncio.run(main())
