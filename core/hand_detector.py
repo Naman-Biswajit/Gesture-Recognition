@@ -1,42 +1,112 @@
-import cv2
+import cv2 as cv
 import mediapipe as mp
+import math
 
 
-class Detector():
-    def __init__(self, mode=False, max_hands=1, model_complexity=1, detection_con=0.5, track_con=0.5):
-        self.mode = mode
+class Detector:
+
+    def __init__(self, static=False, max_hands=1, detection_con=0.8, min_track_con=0.5):
+        self.static = static
         self.max_hands = max_hands
-        self.model_complexity = model_complexity
         self.detection_con = detection_con
-        self.track_con = track_con
+        self.min_track_con = min_track_con
+
         self.mp_hands = mp.solutions.hands
-
-        self.hands = self.mp_hands.Hands(self.mode, self.max_hands, self.model_complexity,
-                                         self.detection_con, self.track_con)
-
+        self.hands = self.mp_hands.Hands(static_image_mode=self.static, max_num_hands=self.max_hands,
+                                         min_detection_confidence=self.detection_con,
+                                         min_tracking_confidence=self.min_track_con)
         self.mp_draw = mp.solutions.drawing_utils
+        self.tip_ids = [4, 8, 12, 16, 20]
+        self.fingers = []
+        self.lm_list = []
 
-    async def find_position(self, frame, hand_no=0, draw=True, colour=(255, 0, 250)):
-
-        lm_list = []
-        if self.results.multi_hand_landmarks:
-            __hand__ = self.results.multi_hand_landmarks[hand_no]
-            for id, lm in enumerate(__hand__.landmark):
-                h, w, c = frame.shape
-                cx, cy = int(lm.x * w), int(lm.y * h)
-                lm_list.append([id, cx, cy])
-                if draw:
-                    cv2.circle(frame, (cx, cy), 15, colour, cv2.FILLED)
-
-        return lm_list
-
-    async def find_hands(self, frame, draw=True):
-        frame_RGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    async def find_hands(self, frame, draw=True, flipType=False, colour = (255, 191, 0)):
+        frame_RGB = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         self.results = self.hands.process(frame_RGB)
-
+        all_hands = []
+        h, w, c = frame.shape
         if self.results.multi_hand_landmarks:
-            for handLms in self.results.multi_hand_landmarks:
+            for hand_type, hand_lms in zip(self.results.multi_handedness, self.results.multi_hand_landmarks):
+                __hand__ = {}
+                _lm_list_ = []
+                xList = []
+                yList = []
+                for id, lm in enumerate(hand_lms.landmark):
+                    px, py, pz = int(lm.x * w), int(lm.y * h), int(lm.z * w)
+                    _lm_list_.append([px, py, pz])
+                    xList.append(px)
+                    yList.append(py)
+
+                xmin, xmax = min(xList), max(xList)
+                ymin, ymax = min(yList), max(yList)
+                boxW, boxH = xmax - xmin, ymax - ymin
+                bbox = xmin, ymin, boxW, boxH
+                cx, cy = bbox[0] + (bbox[2] // 2), \
+                    bbox[1] + (bbox[3] // 2)
+
+                __hand__["lm_list"] = _lm_list_
+                __hand__["bbox"] = bbox
+                __hand__["center"] = (cx, cy)
+
+                if flipType:
+                    if hand_type.classification[0].label == "Right":
+                        __hand__["type"] = "Left"
+                    else:
+                        __hand__["type"] = "Right"
+                else:
+                    __hand__["type"] = hand_type.classification[0].label
+                all_hands.append(__hand__)
+
+                # draw
                 if draw:
-                    self.mp_draw.draw_landmarks(frame, handLms,
-                                               self.mp_hands.HAND_CONNECTIONS)
-        return frame
+                    self.mp_draw.draw_landmarks(frame, hand_lms,
+                                                self.mp_hands.HAND_CONNECTIONS)
+                    cv.rectangle(frame, (bbox[0] - 20, bbox[1] - 20),
+                                 (bbox[0] + bbox[2] + 20,
+                                  bbox[1] + bbox[3] + 20),
+                                 colour, 2)
+                    cv.putText(frame, __hand__["type"], (bbox[0] - 30, bbox[1] - 30), cv.FONT_HERSHEY_SIMPLEX,
+                               2, colour, 2)
+        if draw:
+            return all_hands, frame
+        else:
+            return all_hands
+
+    async def fingers_up(self, __hand__):
+        __hand__Type = __hand__["type"]
+        _lm_list_ = __hand__["lm_list"]
+        if self.results.multi_hand_landmarks:
+            fingers = []
+            if __hand__Type == "Right":
+                if _lm_list_[self.tip_ids[0]][0] > _lm_list_[self.tip_ids[0] - 1][0]:
+                    fingers.append(1)
+                else:
+                    fingers.append(0)
+            else:
+                if _lm_list_[self.tip_ids[0]][0] < _lm_list_[self.tip_ids[0] - 1][0]:
+                    fingers.append(1)
+                else:
+                    fingers.append(0)
+
+            for id in range(1, 5):
+                if _lm_list_[self.tip_ids[id]][1] < _lm_list_[self.tip_ids[id] - 2][1]:
+                    fingers.append(1)
+                else:
+                    fingers.append(0)
+        return fingers
+
+    async def find_distance(self, p1, p2, frame=None, colour=(255, 191, 0)):
+
+        x1, y1 = p1
+        x2, y2 = p2
+        cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
+        length = math.hypot(x2 - x1, y2 - y1)
+        info = (x1, y1, x2, y2, cx, cy)
+        if frame is not None:
+            cv.circle(frame, (x1, y1), 15, colour, cv.FILLED)
+            cv.circle(frame, (x2, y2), 15, colour, cv.FILLED)
+            cv.line(frame, (x1, y1), (x2, y2), colour, 3)
+            cv.circle(frame, (cx, cy), 15, colour, cv.FILLED)
+            return length, info, frame
+        else:
+            return length, info

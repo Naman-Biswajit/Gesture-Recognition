@@ -36,7 +36,7 @@ async def main():
         print(matrix)
         slide[0:cam_y, x - cam_x:x] = integrated_frame
         
-        frame = await detector.find_hands(frame)
+        hands, frame = await detector.find_hands(frame, flipType=False)
 
         if status:
             cv.imshow('IT-EXHIBITION', slide)
