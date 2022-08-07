@@ -12,8 +12,8 @@ class Loader:
         return slides
 
     @staticmethod
-    async def load_slide(idx: int, name: str):
+    async def load_slide(idx: int):
         slides = Loader.sort_slides(idx)
         path = f'./data/imgs/{slides[idx]}'
-        cv.imshow('IT-EXHIBITION', cv.imread(path))
-        return (slides[idx], path)
+        slide = cv.imread(path)
+        return slide
