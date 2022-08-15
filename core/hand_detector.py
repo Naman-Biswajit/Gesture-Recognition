@@ -5,6 +5,7 @@ import os
 import mediapipe as mp
 from dotenv import load_dotenv
 
+
 class Detector:
 
     def __init__(self, static=False, max_hands=1, detection_con=0.8, min_track_con=0.5):
@@ -28,9 +29,9 @@ class Detector:
         self._ln_ = eval(os.environ.get('_LN_'))
         self._tx_ = eval(os.environ.get('_TX_'))
         self._cr_ = eval(os.environ.get('_CR_'))
-        
+
         self.styles = mp.solutions.drawing_styles
-    
+
     async def find_hands(self, frame, draw=True, flipType=True):
         frame_RGB = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         self.results = self.hands.process(frame_RGB)
@@ -55,18 +56,18 @@ class Detector:
                 cx, cy = bbox[0] + (bbox[2] // 2), \
                     bbox[1] + (bbox[3] // 2)
 
-                _hand_["lm_list"] = _lm_list_
-                _hand_["bbox"] = bbox
-                _hand_["center"] = (cx, cy)
+                _hand_['lm_list'] = _lm_list_
+                _hand_['bbox'] = bbox
+                _hand_['center'] = (cx, cy)
 
                 if flipType:
-                    if hand_type.classification[0].label == "Right":
-                        _hand_["type"] = "Left"
+                    if hand_type.classification[0].label == 'Right':
+                        _hand_['type'] = 'Left'
                     else:
-                        _hand_["type"] = "Right"
+                        _hand_['type'] = 'Right'
                 else:
-                    _hand_["type"] = hand_type.classification[0].label
-         
+                    _hand_['type'] = hand_type.classification[0].label
+
                 all_hands.append(_hand_)
 
                 if draw:
@@ -77,7 +78,7 @@ class Detector:
                                  (bbox[0] + bbox[2] + 20,
                                   bbox[1] + bbox[3] + 20),
                                  self._bx_, 2)
-                    cv.putText(frame, _hand_["type"], (bbox[0] - 30, bbox[1] - 30), cv.FONT_HERSHEY_SIMPLEX,
+                    cv.putText(frame, _hand_['type'], (bbox[0] - 30, bbox[1] - 30), cv.FONT_HERSHEY_SIMPLEX,
                                2, self._tx_, 3)
         if draw:
             return all_hands, frame
@@ -85,11 +86,11 @@ class Detector:
             return all_hands
 
     async def fingers_up(self, _hand_):
-        hand__type = _hand_["type"]
-        _lm_list_ = _hand_["lm_list"]
+        hand__type = _hand_['type']
+        _lm_list_ = _hand_['lm_list']
         if self.results.multi_hand_landmarks:
             fingers = []
-            if hand__type == "Right":
+            if hand__type == 'Right':
                 if _lm_list_[self.tip_ids[0]][0] > _lm_list_[self.tip_ids[0] - 1][0]:
                     fingers.append(1)
                 else:
