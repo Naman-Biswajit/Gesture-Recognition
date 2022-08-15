@@ -13,9 +13,14 @@ load_dotenv()
 camera_index = int(os.environ.get('CAMERA_INDEX'))
 cam_x = int(os.environ.get('INTEGRATED_FRAME_X'))
 cam_y = int(os.environ.get('INTEGRATED_FRAME_Y'))
+atc_g = eval(os.environ.get('ATC_G'))
 
-capture = cv.VideoCapture(camera_index)
-detector = Detector()
+
+async def setup():
+    global camera_index
+    return cv.VideoCapture(camera_index), Detector()
+
+capture, detector = asyncio.run(setup())
 
 capture.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
 capture.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
@@ -30,13 +35,18 @@ async def main():
 
         status, frame = capture.read()
         frame = cv.flip(frame, 1)
+        detected, frame = await detector.find_hands(frame, flipType=False)
+
+        if detected:
+            hand = detected[0]
+            fingers = await detector.fingers_up(hand)
+            print(fingers)
+
         integrated_frame = cv.resize(frame, (cam_x, cam_y))
         
-        x, y, z = matrix
-        print(matrix)
+        x, _, _ = matrix
         slide[0:cam_y, x - cam_x:x] = integrated_frame
-        
-        hands, frame = await detector.find_hands(frame, flipType=False)
+        # cv.line(frame, (0, ))
 
         if status:
             cv.imshow('IT-EXHIBITION', slide)
