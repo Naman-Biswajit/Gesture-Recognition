@@ -12,7 +12,7 @@ cam_x = int(os.environ.get('INTEGRATED_FRAME_X'))
 cam_y = int(os.environ.get('INTEGRATED_FRAME_Y'))
 gen_line = eval(os.environ.get('GENERATE_LINE'))
 delay = int(os.environ.get('DELAY'))
-atc_g = eval(os.environ.get('ATC_G'))
+thres_active = eval(os.environ.get('THRESHOLD_ACTIVATE'))
 
 
 async def setup():
@@ -41,7 +41,7 @@ async def main():
         detected, frame = await detector.find_hands(frame, flipType=False)
 
         if gen_line:
-            cv.line(frame, (0, atc_g), (1280, atc_g), (0, 255, 0), 2)
+            cv.line(frame, (0, thres_active), (1280, thres_active), (0, 255, 0), 2)
 
         if detected and post_action[1] > delay:
             hand = detected[0]
@@ -49,17 +49,6 @@ async def main():
             print(fingers)
 
             _, cy = hand['center']
-
-            if cy <= atc_g:
-                if fingers == [0, 0, 0, 0, 0]:
-                    print('ACTION: LEFT')
-                    post_action = [True, 0]
-                    current_slide -= 1
-
-                elif fingers == [1, 0, 0, 0, 1]:
-                    print('ACTION: RIGHT')
-                    post_action = [True, 0]
-                    current_slide += 1
 
         integrated_frame = cv.resize(frame, (cam_x, cam_y))
 

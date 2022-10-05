@@ -92,16 +92,17 @@ class Detector:
             fingers = []
             if hand__type == 'Right':
                 if _lm_list_[self.tip_ids[0]][0] > _lm_list_[self.tip_ids[0] - 1][0]:
-                    fingers.append(1)
-                else:
                     fingers.append(0)
+                else:
+                    fingers.append(1)
             else:
                 if _lm_list_[self.tip_ids[0]][0] < _lm_list_[self.tip_ids[0] - 1][0]:
-                    fingers.append(1)
-                else:
                     fingers.append(0)
+                else:
+                    fingers.append(1)
 
             for id in range(1, 5):
+                print(id)
                 if _lm_list_[self.tip_ids[id]][1] < _lm_list_[self.tip_ids[id] - 2][1]:
                     fingers.append(1)
                 else:
