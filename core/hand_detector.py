@@ -1,8 +1,8 @@
-import cv2 as cv
 import math
 import os
-
+import cv2 as cv
 import mediapipe as mp
+
 from dotenv import load_dotenv
 
 
@@ -10,12 +10,10 @@ class Detector:
 
     def __init__(self, static=False, max_hands=1, detection_con=0.8, min_track_con=0.5):
         load_dotenv()
-
-        self.static = static
         self.max_hands = max_hands
         self.detection_con = detection_con
         self.min_track_con = min_track_con
-
+        self.static = static
         self.mp_hands = mp.solutions.hands
         self.hands = self.mp_hands.Hands(static_image_mode=self.static, max_num_hands=self.max_hands,
                                          min_detection_confidence=self.detection_con,
@@ -31,6 +29,10 @@ class Detector:
         self._cr_ = eval(os.environ.get('_CR_'))
 
         self.styles = mp.solutions.drawing_styles
+        self.landmark_drawing_spec = self.mp_draw.DrawingSpec(
+            color=(158, 46, 109), thickness=4, circle_radius=3)
+        self.connection_drawing_spec = self.mp_draw.DrawingSpec(
+            color=(0, 246, 255), thickness=4)
 
     async def find_hands(self, frame, draw=True, flipType=True):
         frame_RGB = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
@@ -53,8 +55,7 @@ class Detector:
                 ymin, ymax = min(yList), max(yList)
                 boxW, boxH = xmax - xmin, ymax - ymin
                 bbox = xmin, ymin, boxW, boxH
-                cx, cy = bbox[0] + (bbox[2] // 2), \
-                    bbox[1] + (bbox[3] // 2)
+                cx, cy = bbox[0] + (bbox[2] // 2), bbox[1] + (bbox[3] // 2)
 
                 _hand_['lm_list'] = _lm_list_
                 _hand_['bbox'] = bbox
@@ -72,8 +73,10 @@ class Detector:
 
                 if draw:
                     self.mp_draw.draw_landmarks(frame, hand_lms,
-                                                self.mp_hands.HAND_CONNECTIONS)
-
+                                                self.mp_hands.HAND_CONNECTIONS,
+                                                landmark_drawing_spec=self.landmark_drawing_spec,
+                                                connection_drawing_spec=self.connection_drawing_spec
+                                                )
                     cv.rectangle(frame, (bbox[0] - 20, bbox[1] - 20),
                                  (bbox[0] + bbox[2] + 20,
                                   bbox[1] + bbox[3] + 20),
@@ -102,7 +105,6 @@ class Detector:
                     fingers.append(1)
 
             for id in range(1, 5):
-                print(id)
                 if _lm_list_[self.tip_ids[id]][1] < _lm_list_[self.tip_ids[id] - 2][1]:
                     fingers.append(1)
                 else:

@@ -1,6 +1,7 @@
 import os
 import asyncio
 import cv2 as cv
+import pyautogui as pygui
 
 from dotenv import load_dotenv
 from core.slides import Loader
@@ -13,7 +14,7 @@ cam_y = int(os.environ.get('INTEGRATED_FRAME_Y'))
 gen_line = eval(os.environ.get('GENERATE_LINE'))
 delay = int(os.environ.get('DELAY'))
 thres_active = eval(os.environ.get('THRESHOLD_ACTIVATE'))
-
+dominant_hand = str(os.environ.get('DOMINANT_HAND'))
 
 async def setup():
     global camera_index
@@ -46,9 +47,22 @@ async def main():
         if detected and post_action[1] > delay:
             hand = detected[0]
             fingers = await detector.fingers_up(hand)
+            fingers.reverse() if dominant_hand == 'left' else None
+
             print(fingers)
 
             _, cy = hand['center']
+
+            if cy <= thres_active:
+                if fingers == [1, 0, 0, 0, 0]:
+                    print('ACTION: LEFT')
+                    pygui.press('left')
+
+                elif fingers == [0, 0, 0, 0, 1]:
+                    pygui.press('right')
+                    print('ACTION: RIGHT')
+
+                
 
         integrated_frame = cv.resize(frame, (cam_x, cam_y))
 
