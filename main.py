@@ -4,14 +4,12 @@ import cv2 as cv
 import pyautogui as pygui
 
 from dotenv import load_dotenv
-from core.slides import Loader
 from core.hand_detector import Detector
 
 load_dotenv()
+
 camera_index = int(os.environ.get('CAMERA_INDEX'))
-cam_x = int(os.environ.get('INTEGRATED_FRAME_X'))
-cam_y = int(os.environ.get('INTEGRATED_FRAME_Y'))
-gen_line = eval(os.environ.get('GENERATE_LINE'))
+gen_line = eval(os.environ.get('GENERATE_LINE'))    
 delay = int(os.environ.get('DELAY'))
 thres_active = eval(os.environ.get('THRESHOLD_ACTIVATE'))
 dominant_hand = str(os.environ.get('DOMINANT_HAND'))
@@ -28,16 +26,13 @@ capture.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 
 async def main():
     post_action = [False, delay+1]
-    current_slide = 0
     run = True 
-    sorted_slides = await Loader.sort_slides('./data/imgs/')
     
     while run:
 
-        slide = await Loader.load_slide(current_slide, sorted_slides)
-        matrix = slide.shape
-
         status, frame = capture.read()
+        matrix = frame.shape
+
         frame = cv.flip(frame, 1)
         detected, frame = await detector.find_hands(frame, flipType=False)
 
@@ -62,15 +57,7 @@ async def main():
                     pygui.press('right')
                     print('ACTION: RIGHT')
 
-                
-
-        integrated_frame = cv.resize(frame, (cam_x, cam_y))
-
-        x, _, _ = matrix
-        slide[0:cam_y, x - cam_x:x] = integrated_frame
-
         if status:
-            cv.imshow('IT-EXHIBITION', slide)
             cv.imshow('Camera View', frame)
 
         else:
