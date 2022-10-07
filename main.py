@@ -11,8 +11,8 @@ config = Config()
 detector = Detector()
 capture = cv.VideoCapture(config.camera_index)
 
-capture.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-capture.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
+capture.set(cv.CAP_PROP_FRAME_WIDTH, m_x := 1280)
+capture.set(cv.CAP_PROP_FRAME_HEIGHT, m_y := 720)
 
 
 logging.basicConfig(format=config.log_format, filename='logs.log',
@@ -29,20 +29,23 @@ async def main():
         frame = cv.flip(frame, 1)
         detected, frame = await detector.find_hands(frame, flipType=False)
 
-        if config.gen_line:
-            cv.line(frame, (0, config.thres_active),
-                    (1280, config.thres_active), (0, 255, 0), 2)
+        if config.gen_box:
+            x, y = config.thres_x, config.thres_y
+            overlay = frame.copy()
+            cv.rectangle(overlay, (m_x, 0), (m_x - x, y), config.field_clr, -1)
+            frame = cv.addWeighted(
+                overlay, config.field_opacity, frame, 1-config.field_opacity, 0)
 
         if detected:
             hand = detected[0]
             fingers = await detector.fingers_up(hand)
-            fingers.reverse() if config.dominant_hand == 'left' else None
+            # fingers.reverse() if config.dominant_hand == 'left' else None
 
             print(fingers)
 
-            _, cy = hand['center']
-
-            if cy <= config.thres_active and post_action[1] > config.delay:
+            x, y = hand['center']
+            flag = y <= config.thres_y and x >= m_x - config.thres_x
+            if flag and post_action[1] > config.delay:
                 match fingers:
                     case [1, 0, 0, 0, 0]:
                         print('\033[91m{}\033[00m'.format(
@@ -58,26 +61,30 @@ async def main():
                         print('\033[92m{}\033[00m'.format(
                             log := 'ACTIVE: Mouse Mode'))
 
+                    case [0, 1, 1, 1, 1]:
+                        print('"\033[1m\033[31m{}\033[0m"'.format(log:='TOGGLE: Assist Box '))
+                        config.gen_box = not config.gen_box
+
                     case _:
                         log = None
 
                 if log is not None:
                     post_action = [True, 0]
                     logging.info(log)
-
+        
         if status:
             cv.imshow('Camera View', frame)
 
         else:
             raise Exception('Error: Cannot read frame')
 
+        post_action[1] += 1 if post_action[0] else 0
+        post_action[0] = False if post_action[1] > config.delay else post_action[0]
+
         if cv.waitKey(1) == ord('q'):
             run = False
             capture.release()
             cv.destroyAllWindows()
-
-        post_action[1] += 1 if post_action[0] else 0
-        post_action[0] = False if post_action[1] > config.delay else post_action[0]
 
 if __name__ == '__main__':
     asyncio.run(main())
