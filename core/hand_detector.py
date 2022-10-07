@@ -1,15 +1,14 @@
 import math
-import os
 import cv2 as cv
 import mediapipe as mp
 
-from dotenv import load_dotenv
+from .utils import parse_config
 
 
 class Detector:
 
     def __init__(self, static=False, max_hands=1, detection_con=0.8, min_track_con=0.5):
-        load_dotenv()
+        self.config = parse_config()
         self.max_hands = max_hands
         self.detection_con = detection_con
         self.min_track_con = min_track_con
@@ -22,11 +21,6 @@ class Detector:
         self.tip_ids = [4, 8, 12, 16, 20]
         self.fingers = []
         self.lm_list = []
-
-        self._bx_ = eval(os.environ.get('_BX_'))
-        self._ln_ = eval(os.environ.get('_LN_'))
-        self._tx_ = eval(os.environ.get('_TX_'))
-        self._cr_ = eval(os.environ.get('_CR_'))
 
         self.styles = mp.solutions.drawing_styles
         self.landmark_drawing_spec = self.mp_draw.DrawingSpec(
@@ -80,9 +74,9 @@ class Detector:
                     cv.rectangle(frame, (bbox[0] - 20, bbox[1] - 20),
                                  (bbox[0] + bbox[2] + 20,
                                   bbox[1] + bbox[3] + 20),
-                                 self._bx_, 2)
+                                 self.config._bx_, 2)
                     cv.putText(frame, _hand_['type'], (bbox[0] - 30, bbox[1] - 30), cv.FONT_HERSHEY_SIMPLEX,
-                               2, self._tx_, 3)
+                               2, self.config._tx_, 3)
         if draw:
             return all_hands, frame
         else:
@@ -119,8 +113,8 @@ class Detector:
         length = math.hypot(x2 - x1, y2 - y1)
         info = (x1, y1, x2, y2, cx, cy)
         if frame is not None:
-            cv.circle(frame, (x1, y1), 15, self._cr_, cv.FILLED)
-            cv.circle(frame, (x2, y2), 15, self._cr_, cv.FILLED)
+            cv.circle(frame, (x1, y1), 15, self.config._cr_, cv.FILLED)
+            cv.circle(frame, (x2, y2), 15, self.config._cr_, cv.FILLED)
             cv.line(frame, (x1, y1), (x2, y2), self.__ln__, 3)
             cv.circle(frame, (cx, cy), 15, self.cr, cv.FILLED)
             return length, info, frame
