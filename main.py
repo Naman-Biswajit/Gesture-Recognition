@@ -1,3 +1,4 @@
+from email.policy import default
 import os
 import asyncio
 import cv2 as cv
@@ -39,7 +40,7 @@ async def main():
         if gen_line:
             cv.line(frame, (0, thres_active), (1280, thres_active), (0, 255, 0), 2)
 
-        if detected and post_action[1] > delay:
+        if detected:
             hand = detected[0]
             fingers = await detector.fingers_up(hand)
             fingers.reverse() if dominant_hand == 'left' else None
@@ -48,15 +49,18 @@ async def main():
 
             _, cy = hand['center']
 
-            if cy <= thres_active:
-                if fingers == [1, 0, 0, 0, 0]:
-                    print('ACTION: LEFT')
-                    pygui.press('left')
+            if cy <= thres_active and post_action[1] > delay:
+                match fingers:
+                    case [1, 0, 0, 0, 0]:
+                        print('ACTION: LEFT')
+                        pygui.press('left')
+                        post_action = [True, 0]
 
-                elif fingers == [0, 0, 0, 0, 1]:
-                    pygui.press('right')
-                    print('ACTION: RIGHT')
-
+                    case [0, 0, 0, 0, 1]:
+                        print('ACTION: RIGHT')
+                        pygui.press('right')
+                        post_action = [True, 0]
+                    
         if status:
             cv.imshow('Camera View', frame)
 
