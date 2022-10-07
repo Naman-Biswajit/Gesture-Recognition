@@ -1,17 +1,22 @@
 import asyncio
+import logging
 import cv2 as cv
 import pyautogui as pygui
 
 from core.hand_detector import Detector
-from core.utils import parse_config
+from core.utils import Config
 
-config = parse_config()
 
-capture = cv.VideoCapture(config.camera_index)
+config = Config()
 detector = Detector()
+capture = cv.VideoCapture(config.camera_index)
 
 capture.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
 capture.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
+
+
+logging.basicConfig(format=config.log_format, filename='logs.log',
+                    encoding='utf-8', level=logging.INFO, filemode=config.log_mode)
 
 
 async def main():
@@ -21,8 +26,6 @@ async def main():
     while run:
 
         status, frame = capture.read()
-        matrix = frame.shape
-
         frame = cv.flip(frame, 1)
         detected, frame = await detector.find_hands(frame, flipType=False)
 
@@ -42,20 +45,31 @@ async def main():
             if cy <= config.thres_active and post_action[1] > config.delay:
                 match fingers:
                     case [1, 0, 0, 0, 0]:
-                        print('ACTION: LEFT')
+                        print('\033[91m{}\033[00m'.format(
+                            log := 'ACTION: Left'))
                         pygui.press('left')
-                        post_action = [True, 0]
 
                     case [0, 0, 0, 0, 1]:
-                        print('ACTION: RIGHT')
+                        print('\033[91m{}\033[00m'.format(
+                            log := 'ACTION: Right'))
                         pygui.press('right')
-                        post_action = [True, 0]
+
+                    case [0, 1, 1, 1, 0]:
+                        print('\033[92m{}\033[00m'.format(
+                            log := 'ACTIVE: Mouse Mode'))
+
+                    case _:
+                        log = None
+
+                if log is not None:
+                    post_action = [True, 0]
+                    logging.info(log)
 
         if status:
             cv.imshow('Camera View', frame)
 
         else:
-            print('Error: Cannot read frame')
+            raise Exception('Error: Cannot read frame')
 
         if cv.waitKey(1) == ord('q'):
             run = False

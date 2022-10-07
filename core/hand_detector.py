@@ -2,13 +2,13 @@ import math
 import cv2 as cv
 import mediapipe as mp
 
-from .utils import parse_config
+from .utils import Config
 
 
 class Detector:
 
     def __init__(self, static=False, max_hands=1, detection_con=0.8, min_track_con=0.5):
-        self.config = parse_config()
+        self.config = Config()
         self.max_hands = max_hands
         self.detection_con = detection_con
         self.min_track_con = min_track_con
