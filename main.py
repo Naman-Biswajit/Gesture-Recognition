@@ -2,6 +2,7 @@ import asyncio
 import logging
 import cv2 as cv
 import pyautogui as pygui
+import time
 
 from core.hand_detector import Detector
 from core.utils import Config
@@ -15,19 +16,20 @@ capture.set(cv.CAP_PROP_FRAME_WIDTH, m_x := 1280)
 capture.set(cv.CAP_PROP_FRAME_HEIGHT, m_y := 720)
 
 
-logging.basicConfig(format=config.log_format, filename='logs.log',
-                    encoding='utf-8', level=logging.INFO, filemode=config.log_mode)
+if config.logging:
+    logging.basicConfig(format=config.log_format, filename='logs.log',
+                        encoding='utf-8', level=logging.INFO, filemode=config.log_mode)
 
 
-async def main():
+def main():
     post_action = [False, config.delay+1]
     run = True
 
     while run:
-
+        t1 = time.time()
         status, frame = capture.read()
         frame = cv.flip(frame, 1)
-        detected, frame = await detector.find_hands(frame, flipType=False)
+        detected, frame = detector.find_hands(frame, flipType=False)
 
         if config.gen_box:
             x, y = config.thres_x, config.thres_y
@@ -38,7 +40,7 @@ async def main():
 
         if detected:
             hand = detected[0]
-            fingers = await detector.fingers_up(hand)
+            fingers = detector.fingers_up(hand)
             # fingers.reverse() if config.dominant_hand == 'left' else None
 
             print(fingers)
@@ -62,7 +64,8 @@ async def main():
                             log := 'ACTIVE: Mouse Mode'))
 
                     case [0, 1, 1, 1, 1]:
-                        print('"\033[1m\033[31m{}\033[0m"'.format(log:='TOGGLE: Assist Box '))
+                        print("\033[1m\033[31m{}\033[0m".format(
+                            log := 'TOGGLE: Assist Box'))
                         config.gen_box = not config.gen_box
 
                     case _:
@@ -70,16 +73,18 @@ async def main():
 
                 if log is not None:
                     post_action = [True, 0]
-                    logging.info(log)
-        
-        if status:
-            cv.imshow('Camera View', frame)
-
-        else:
-            raise Exception('Error: Cannot read frame')
+                    logging.info(log) if config.logging else None
 
         post_action[1] += 1 if post_action[0] else 0
         post_action[0] = False if post_action[1] > config.delay else post_action[0]
+
+        t2 = time.time()
+        fps = 1/float(t2-t1)
+
+        cv.putText(frame, f"FPS: {fps:.2f}", (50, 50),
+                   cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+
+        cv.imshow('Camera View', frame)
 
         if cv.waitKey(1) == ord('q'):
             run = False
@@ -87,4 +92,4 @@ async def main():
             cv.destroyAllWindows()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()

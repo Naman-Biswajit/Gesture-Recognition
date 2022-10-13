@@ -28,7 +28,7 @@ class Detector:
         self.connection_drawing_spec = self.mp_draw.DrawingSpec(
             color=(0, 246, 255), thickness=4)
 
-    async def find_hands(self, frame, draw=True, flipType=True):
+    def find_hands(self, frame, draw=True, flipType=True):
         frame_RGB = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         self.results = self.hands.process(frame_RGB)
         all_hands = []
@@ -82,7 +82,7 @@ class Detector:
         else:
             return all_hands
 
-    async def fingers_up(self, _hand_):
+    def fingers_up(self, _hand_):
         hand__type = _hand_['type']
         _lm_list_ = _hand_['lm_list']
         if self.results.multi_hand_landmarks:
@@ -105,7 +105,7 @@ class Detector:
                     fingers.append(0)
         return fingers
 
-    async def find_distance(self, p1, p2, frame=None):
+    def find_distance(self, p1, p2, frame=None):
 
         x1, y1 = p1
         x2, y2 = p2

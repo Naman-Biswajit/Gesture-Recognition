@@ -14,6 +14,7 @@ class Config:
     thres_y: int = 400
     thres_x: int = 500
     # dominant_hand: str = 'right'
+    logging = False
     gen_box: bool = True
     log_format: str = '%(asctime)s ~ %(levelname)s:%(message)s'
     log_mode: str = 'w+'
