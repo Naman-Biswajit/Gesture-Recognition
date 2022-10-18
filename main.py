@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import cv2 as cv
 import pyautogui as pygui
@@ -41,7 +40,6 @@ def main():
         if detected:
             hand = detected[0]
             fingers = detector.fingers_up(hand)
-            # fingers.reverse() if config.dominant_hand == 'left' else None
 
             print(fingers)
 

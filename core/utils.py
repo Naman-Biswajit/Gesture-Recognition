@@ -13,8 +13,10 @@ class Config:
     camera_index: int = 0
     thres_y: int = 400
     thres_x: int = 500
-    # dominant_hand: str = 'right'
     logging = False
     gen_box: bool = True
     log_format: str = '%(asctime)s ~ %(levelname)s:%(message)s'
     log_mode: str = 'w+'
+
+def fetch_default_config():
+    return Config()

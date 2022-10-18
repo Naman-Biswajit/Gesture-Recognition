@@ -128,5 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# profiling
+
+# custom
 *.prof
+testing.py
