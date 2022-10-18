@@ -7,8 +7,8 @@ from .utils import Config
 
 class Detector:
 
-    def __init__(self, static=False, max_hands=1, detection_con=0.8, min_track_con=0.5):
-        self.config = Config()
+    def __init__(self, config, static=False, max_hands=1, detection_con=0.8, min_track_con=0.5):
+        self.config = config
         self.max_hands = max_hands
         self.detection_con = detection_con
         self.min_track_con = min_track_con
@@ -37,18 +37,18 @@ class Detector:
             for hand_type, hand_lms in zip(self.results.multi_handedness, self.results.multi_hand_landmarks):
                 _hand_ = {}
                 _lm_list_ = []
-                xList = []
-                yList = []
+                x_list = []
+                y_list = []
                 for id, lm in enumerate(hand_lms.landmark):
                     px, py, pz = int(lm.x * w), int(lm.y * h), int(lm.z * w)
                     _lm_list_.append([px, py, pz])
-                    xList.append(px)
-                    yList.append(py)
+                    x_list.append(px)
+                    y_list.append(py)
 
-                xmin, xmax = min(xList), max(xList)
-                ymin, ymax = min(yList), max(yList)
-                boxW, boxH = xmax - xmin, ymax - ymin
-                bbox = xmin, ymin, boxW, boxH
+                xmin, xmax = min(x_list), max(x_list)
+                ymin, ymax = min(y_list), max(y_list)
+                boxw, boxh = xmax - xmin, ymax - ymin
+                bbox = xmin, ymin, boxw, boxh
                 cx, cy = bbox[0] + (bbox[2] // 2), bbox[1] + (bbox[3] // 2)
 
                 _hand_['lm_list'] = _lm_list_

@@ -1,7 +1,7 @@
 from threading import Thread
 
 
-class Threader():
+class Threader:
     def __init__(self, config):
         self.config = config
 

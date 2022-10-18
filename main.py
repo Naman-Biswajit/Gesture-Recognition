@@ -8,7 +8,7 @@ from core.utils import Config
 
 
 config = Config()
-detector = Detector()
+detector = Detector(config)
 capture = cv.VideoCapture(config.camera_index)
 
 capture.set(cv.CAP_PROP_FRAME_WIDTH, m_x := 1280)
@@ -62,9 +62,15 @@ def main():
                             log := 'ACTIVE: Mouse Mode'))
 
                     case [0, 1, 1, 1, 1]:
-                        print("\033[1m\033[31m{}\033[0m".format(
-                            log := 'TOGGLE: Assist Box'))
-                        config.gen_box = not config.gen_box
+                        if config.field_toggle:
+                            print("\033[1m\033[31m{}\033[0m".format(
+                                log := 'TOGGLE: Assist Box'))
+                            config.gen_box = not config.gen_box
+                        
+                        else:
+                            print("\033[1m\033[31m{}\033[0m".format(
+                            log := 'IGNORING: Toogle Assist Box'))
+
 
                     case _:
                         log = None
@@ -88,6 +94,7 @@ def main():
             run = False
             capture.release()
             cv.destroyAllWindows()
+
 
 if __name__ == '__main__':
     main()

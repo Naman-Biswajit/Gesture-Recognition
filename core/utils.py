@@ -7,7 +7,7 @@ class Config:
     _bx_: tuple = (128, 128, 0)
     _cr_: tuple = (52, 0, 199)
     _ln_: tuple = (144, 157, 42)
-    field_clr: tuple = (0, 97, 242)
+    field_clr: tuple = (244, 168, 57)
     field_opacity: float = 0.19
     delay: int = 15
     camera_index: int = 0
@@ -17,6 +17,7 @@ class Config:
     gen_box: bool = True
     log_format: str = '%(asctime)s ~ %(levelname)s:%(message)s'
     log_mode: str = 'w+'
+    field_toggle: bool = False
 
 def fetch_default_config():
     return Config()
