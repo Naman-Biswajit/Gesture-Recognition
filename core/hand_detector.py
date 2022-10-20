@@ -1,34 +1,27 @@
-import math
+# import math
 import cv2 as cv
-import mediapipe as mp
-
-from .utils import Config
-
+from .utils import fetch_asdict_model
+from mediapipe import solutions
 
 class Detector:
 
-    def __init__(self, config, static=False, max_hands=1, detection_con=0.8, min_track_con=0.5):
+    def __init__(self, config):
+        model = fetch_asdict_model()
         self.config = config
-        self.max_hands = max_hands
-        self.detection_con = detection_con
-        self.min_track_con = min_track_con
-        self.static = static
-        self.mp_hands = mp.solutions.hands
-        self.hands = self.mp_hands.Hands(static_image_mode=self.static, max_num_hands=self.max_hands,
-                                         min_detection_confidence=self.detection_con,
-                                         min_tracking_confidence=self.min_track_con)
-        self.mp_draw = mp.solutions.drawing_utils
+        self.mp_hands = solutions.hands
+        self.hands = self.mp_hands.Hands(**model)
+        self.mp_draw = solutions.drawing_utils
         self.tip_ids = [4, 8, 12, 16, 20]
         self.fingers = []
         self.lm_list = []
 
-        self.styles = mp.solutions.drawing_styles
+        self.styles = solutions.drawing_styles
         self.landmark_drawing_spec = self.mp_draw.DrawingSpec(
             color=(158, 46, 109), thickness=4, circle_radius=3)
         self.connection_drawing_spec = self.mp_draw.DrawingSpec(
             color=(0, 246, 255), thickness=4)
 
-    def find_hands(self, frame, draw=True, flipType=True):
+    def locate_hands(self, frame, draw=True, flipType=True):
         frame_RGB = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         self.results = self.hands.process(frame_RGB)
         all_hands = []
@@ -77,10 +70,8 @@ class Detector:
                                  self.config._bx_, 2)
                     cv.putText(frame, _hand_['type'], (bbox[0] - 30, bbox[1] - 30), cv.FONT_HERSHEY_SIMPLEX,
                                2, self.config._tx_, 3)
-        if draw:
-            return all_hands, frame
-        else:
-            return all_hands
+
+        return all_hands, frame
 
     def fingers_up(self, _hand_):
         hand__type = _hand_['type']
@@ -105,7 +96,22 @@ class Detector:
                     fingers.append(0)
         return fingers
 
-    def find_distance(self, p1, p2, frame=None):
+    def locate_position(self, img, idx=0, draw=True):
+
+        lm_list = []
+        if self.results.multi_hand_landmarks:
+            myHand = self.results.multi_hand_landmarks[idx]
+            for id, lm in enumerate(myHand.landmark):
+                h, w, c = img.shape
+                cx, cy = int(lm.x * w), int(lm.y * h)
+                lm_list.append([id, cx, cy])
+                if draw:
+                    cv.circle(img, (cx, cy), 15, (255, 0, 255), cv.FILLED)
+
+        return lm_list
+
+
+"""    def find_distance(self, p1, p2, frame=None):
 
         x1, y1 = p1
         x2, y2 = p2
@@ -120,3 +126,4 @@ class Detector:
             return length, info, frame
         else:
             return length, info
+"""

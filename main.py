@@ -7,12 +7,13 @@ from core.hand_detector import Detector
 from core.utils import Config
 
 
+
 config = Config()
 detector = Detector(config)
 capture = cv.VideoCapture(config.camera_index)
 
-capture.set(cv.CAP_PROP_FRAME_WIDTH, m_x := 1280)
-capture.set(cv.CAP_PROP_FRAME_HEIGHT, m_y := 720)
+capture.set(cv.CAP_PROP_FRAME_WIDTH, config.width)
+capture.set(cv.CAP_PROP_FRAME_WIDTH, config.height)
 
 
 if config.logging:
@@ -26,14 +27,17 @@ def main():
 
     while run:
         t1 = time.time()
-        status, frame = capture.read()
+        _, frame = capture.read()
         frame = cv.flip(frame, 1)
-        detected, frame = detector.find_hands(frame, flipType=False)
+
+        detected, frame = detector.locate_hands(frame, flipType=False)
+
+        
 
         if config.gen_box:
             x, y = config.thres_x, config.thres_y
             overlay = frame.copy()
-            cv.rectangle(overlay, (m_x, 0), (m_x - x, y), config.field_clr, -1)
+            cv.rectangle(overlay, (config.width, 0), (config.width - x, y), config.field_clr, -1)
             frame = cv.addWeighted(
                 overlay, config.field_opacity, frame, 1-config.field_opacity, 0)
 
@@ -44,7 +48,7 @@ def main():
             print(fingers)
 
             x, y = hand['center']
-            flag = y <= config.thres_y and x >= m_x - config.thres_x
+            flag = y <= config.thres_y and x >= config.width - config.thres_x
             if flag and post_action[1] > config.delay:
                 match fingers:
                     case [1, 0, 0, 0, 0]:
