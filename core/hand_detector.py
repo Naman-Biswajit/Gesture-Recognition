@@ -96,17 +96,15 @@ class Detector:
                     fingers.append(0)
         return fingers
 
-    def locate_position(self, img, idx=0, draw=True):
+    def locate_position(self, img, idx=0):
 
         lm_list = []
         if self.results.multi_hand_landmarks:
-            myHand = self.results.multi_hand_landmarks[idx]
-            for id, lm in enumerate(myHand.landmark):
+            hand = self.results.multi_hand_landmarks[idx]
+            for id, lm in enumerate(hand.landmark):
                 h, w, c = img.shape
                 cx, cy = int(lm.x * w), int(lm.y * h)
                 lm_list.append([id, cx, cy])
-                if draw:
-                    cv.circle(img, (cx, cy), 15, (255, 0, 255), cv.FILLED)
 
         return lm_list
 

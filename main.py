@@ -1,14 +1,15 @@
 import logging
 import cv2 as cv
-import pyautogui as pygui
 import time
+# import pyautogui as auto
 
 from core.hand_detector import Detector
 from core.utils import Config
-
+from core.processing import Control
 
 
 config = Config()
+control = Control()
 detector = Detector(config)
 capture = cv.VideoCapture(config.camera_index)
 
@@ -32,12 +33,12 @@ def main():
 
         detected, frame = detector.locate_hands(frame, flipType=False)
 
-        
-
+        # control.move(frame, detector)
         if config.gen_box:
             x, y = config.thres_x, config.thres_y
             overlay = frame.copy()
-            cv.rectangle(overlay, (config.width, 0), (config.width - x, y), config.field_clr, -1)
+            cv.rectangle(overlay, (config.width, 0),
+                         (config.width - x, y), config.field_clr, -1)
             frame = cv.addWeighted(
                 overlay, config.field_opacity, frame, 1-config.field_opacity, 0)
 
@@ -54,12 +55,12 @@ def main():
                     case [1, 0, 0, 0, 0]:
                         print('\033[91m{}\033[00m'.format(
                             log := 'ACTION: Left'))
-                        pygui.press('left')
+                        # auto.press('left')
 
                     case [0, 0, 0, 0, 1]:
                         print('\033[91m{}\033[00m'.format(
                             log := 'ACTION: Right'))
-                        pygui.press('right')
+                        # auto.press('right')
 
                     case [0, 1, 1, 1, 0]:
                         print('\033[92m{}\033[00m'.format(
@@ -70,11 +71,10 @@ def main():
                             print("\033[1m\033[31m{}\033[0m".format(
                                 log := 'TOGGLE: Assist Box'))
                             config.gen_box = not config.gen_box
-                        
+
                         else:
                             print("\033[1m\033[31m{}\033[0m".format(
-                            log := 'IGNORING: Toogle Assist Box'))
-
+                                log := 'IGNORING: Toogle Assist Box'))
 
                     case _:
                         log = None
@@ -89,7 +89,7 @@ def main():
         t2 = time.time()
         fps = 1/float(t2-t1)
 
-        cv.putText(frame, f"FPS: {fps:.2f}", (50, 50),
+        cv.putText(frame, f"FPS: {round(fps)}", (50, 50),
                    cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
 
         cv.imshow('Camera View', frame)
