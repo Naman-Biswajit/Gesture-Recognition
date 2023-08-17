@@ -1,26 +1,17 @@
-import logging
 import cv2 as cv
 import time
-# import pyautogui as auto
 
 from core.hand_detector import Detector
 from core.utils import Config
-from core.processing import Control
-
+from core.event_handler import Handler
 
 config = Config()
-control = Control()
+handle = Handler()
 detector = Detector(config)
-capture = cv.VideoCapture(config.camera_index)
 
+capture = cv.VideoCapture(config.camera_index)
 capture.set(cv.CAP_PROP_FRAME_WIDTH, config.width)
 capture.set(cv.CAP_PROP_FRAME_WIDTH, config.height)
-
-
-if config.logging:
-    logging.basicConfig(format=config.log_format, filename='logs.log',
-                        encoding='utf-8', level=logging.INFO, filemode=config.log_mode)
-
 
 def main():
     post_action = [False, config.delay+1]
@@ -33,7 +24,6 @@ def main():
 
         detected, frame = detector.locate_hands(frame, flipType=False)
 
-        # control.move(frame, detector)
         if config.gen_box:
             x, y = config.thres_x, config.thres_y
             overlay = frame.copy()
@@ -51,37 +41,7 @@ def main():
             x, y = hand['center']
             flag = y <= config.thres_y and x >= config.width - config.thres_x
             if flag and post_action[1] > config.delay:
-                match fingers:
-                    case [1, 0, 0, 0, 0]:
-                        print('\033[91m{}\033[00m'.format(
-                            log := 'ACTION: Left'))
-                        # auto.press('left')
-
-                    case [0, 0, 0, 0, 1]:
-                        print('\033[91m{}\033[00m'.format(
-                            log := 'ACTION: Right'))
-                        # auto.press('right')
-
-                    case [0, 1, 1, 1, 0]:
-                        print('\033[92m{}\033[00m'.format(
-                            log := 'ACTIVE: Mouse Mode'))
-
-                    case [0, 1, 1, 1, 1]:
-                        if config.field_toggle:
-                            print("\033[1m\033[31m{}\033[0m".format(
-                                log := 'TOGGLE: Assist Box'))
-                            config.gen_box = not config.gen_box
-
-                        else:
-                            print("\033[1m\033[31m{}\033[0m".format(
-                                log := 'IGNORING: Toogle Assist Box'))
-
-                    case _:
-                        log = None
-
-                if log is not None:
-                    post_action = [True, 0]
-                    logging.info(log) if config.logging else None
+                post_action = handle.fingers(fingers, post_action)
 
         post_action[1] += 1 if post_action[0] else 0
         post_action[0] = False if post_action[1] > config.delay else post_action[0]

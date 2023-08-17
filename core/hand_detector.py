@@ -1,4 +1,3 @@
-# import math
 import cv2 as cv
 from .utils import fetch_asdict_model
 from mediapipe import solutions
@@ -114,7 +113,6 @@ class Detector:
         x1, y1 = p1
         x2, y2 = p2
         cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
-        length = math.hypot(x2 - x1, y2 - y1)
         info = (x1, y1, x2, y2, cx, cy)
         if frame is not None:
             cv.circle(frame, (x1, y1), 15, self.config._cr_, cv.FILLED)
