@@ -1,1 +1,1 @@
-# it-exhibition-2022-
+# Gesture-Recognition
