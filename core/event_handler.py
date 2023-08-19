@@ -1,10 +1,9 @@
 import pyautogui
 import logging
-from .utils import Config
 
 class Handler:
-    def __init__(self, ):
-        self.config = Config()
+    def __init__(self, config):
+        self.config = config
         
         if self.config.logging:
             logging.basicConfig(format=self.config.log_format, filename='logs.log',

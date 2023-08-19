@@ -23,7 +23,7 @@ class Config:
     thres_y: int = round(0.5*height)
     thres_x: int = round(0.7*width)
     logging = False
-    gen_box: bool = True
+    G_field: bool = True
     log_format: str = '%(asctime)s ~ %(levelname)s:%(message)s'
     log_mode: str = 'w+'
     field_toggle: bool = False

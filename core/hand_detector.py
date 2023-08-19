@@ -95,7 +95,7 @@ class Detector:
                     fingers.append(0)
         return fingers
 
-    def locate_position(self, img, idx=0):
+    def position(self, img, idx=0):
 
         lm_list = []
         if self.results.multi_hand_landmarks:
