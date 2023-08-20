@@ -33,9 +33,9 @@ class Handler:
     def click(self, detector, frame, lm_list):
         if len(lm_list) != 0:
             length, frame, _ = detector.distance(8, 12, frame, lm_list)
-            print(length)
             if (length < 36):
                 pag.click(button="primary")
+                # print('MOUSE: CLICKED')
 
         return frame
 

@@ -77,14 +77,15 @@ class VideoStream:
             frame = cv.flip(frame, 1)
 
             detected, frame = self.detector.locate_hands(frame, flip=False)
-            frame = self.overaly_field(frame) if self.move else frame
+            frame = self.overaly_field(frame) if not self.move else frame
 
             lm_list = self.detector.position(frame)
             cordinates = self.process(detected, lm_list)
-            frame = self.generate_region(frame, cordinates)
 
-            self.lx, self.ly = cordinates[0], cordinates[1]
-            frame = self.event.click(self.detector, frame, lm_list)
+            if self.move:
+                frame = self.generate_region(frame, cordinates)
+                self.lx, self.ly = cordinates[0], cordinates[1]
+                frame = self.event.click(self.detector, frame, lm_list)
 
 
             t2 = time.time()
@@ -95,10 +96,10 @@ class VideoStream:
 
             cv.imshow('Camera View', frame)
 
-            if cv.waitKey(1) == ord('q'):
-                run = False
-                self.capture.release()
-                cv.destroyAllWindows()
+            # if cv.waitKey(1) == ord('q'):
+            #     run = False
+            #     self.capture.release()
+            #     cv.destroyAllWindows()
 
             if cv.waitKey(1) == ord('m'):
                 print('TOGGLE: Mouse Mode')
