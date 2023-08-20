@@ -19,6 +19,8 @@ class Config:
     field_clr: tuple = (244, 168, 57)
     rect_clr: tuple = (66, 245, 72)
     thickness: int = 3
+    radii: int = 14
+    circle_clr: tuple = (105, 78, 72)
 
     width: int = 640
     height: int = 480

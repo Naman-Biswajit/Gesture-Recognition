@@ -15,6 +15,8 @@ class VideoStream:
         self.capture = cv.VideoCapture(self.cfg.camera_index)
         self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.cfg.width)
         self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.cfg.height)
+        
+        self.move = True
         self.main()
 
     def overaly_field(self, frame):
@@ -29,9 +31,8 @@ class VideoStream:
         return frame
 
     def process(self, detected, lm_list):
-        move = True
-        ix, iy = -1, -1
-      
+        cordinates = [-100, -100, -100, -100]
+
         if detected:
             hand = detected[0]
             fingers = self.detector.fingers_up(hand)
@@ -41,25 +42,28 @@ class VideoStream:
             x, y = hand['center']
             flag = y <= self.cfg.ty and x >= self.cfg.width - self.cfg.tx
 
-            if flag:
+            if self.move:
+                cordinates = self.event.cursor(lm_list)
+            
+            elif flag:
                 self.td = self.event.execute(fingers, self.td, lm_list)
 
-            if move:
-                ix, iy = self.event.cursor(lm_list)
 
 
-        return ix, iy
+        return cordinates
 
-    def draw_field(self, frame, ix, iy):
+    def generate_region(self, frame, cord):
 
-        if ix >= 0 and iy >= 0:
+        if cord[0] >= 0 and cord[1] >= 0:
             cv.rectangle(frame,
                          (self.cfg.lof, self.cfg.tof),
                          (self.cfg.width-self.cfg.rof,
                           self.cfg.height-self.cfg.dof),
                           self.cfg.rect_clr,
                           self.cfg.thickness)
-
+            
+            cv.circle(frame, (cord[2], cord[3]), self.cfg.radii, self.cfg.circle_clr, cv.FILLED)
+        
         return frame
 
     def main(self):
@@ -73,9 +77,9 @@ class VideoStream:
 
             detected, frame = self.detector.locate_hands(frame, flip=False)
             lm_list = self.detector.position(frame)
-            frame = self.overaly_field(frame)
-            ix, iy = self.process(detected, lm_list)
-            frame = self.draw_field(frame, ix, iy)
+            frame = self.overaly_field(frame) if self.move else frame
+            cordinates = self.process(detected, lm_list)
+            frame = self.generate_region(frame, cordinates)
 
             t2 = time.time()
             fps = 1/float(t2-t1)
@@ -90,6 +94,9 @@ class VideoStream:
                 self.capture.release()
                 cv.destroyAllWindows()
 
+            if cv.waitKey(2) == ord('m'):
+                print('TOGGLE: Mouse Mode')
+                self.move = not self.move
 
 if __name__ == '__main__':
     VideoStream()

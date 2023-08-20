@@ -16,7 +16,7 @@ class Handler:
     def cursor(self, lm_list):
         if len(lm_list) != 0:
             ix, iy = lm_list[8][1:]
-            mx, my = lm_list[12][1:]
+            # mx, my = lm_list[12][1:]
             x = interp(ix, (self.cfg.lof, self.cfg.width -
                        self.cfg.rof), (0, self.rx))
             
@@ -24,7 +24,7 @@ class Handler:
                        self.cfg.dof), (0, self.ry))
 
             pag.moveTo(x, y, _pause=False)
-            return x, y
+            return [x, y, ix, iy]
 
     def execute(self, fingers, timed, log=None):
         offset = timed+self.cfg.delay
