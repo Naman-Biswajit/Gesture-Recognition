@@ -19,7 +19,7 @@ class VideoStream:
 
     def overaly_field(self, frame):
         if self.cfg.G_field:
-            x, y = self.cfg.thres_x, self.cfg.thres_y
+            x, y = self.cfg.tx, self.cfg.ty
             overlay = frame.copy()
             cv.rectangle(overlay, (self.cfg.width, 0),
                         (self.cfg.width - x, y), self.cfg.field_clr, -1)
@@ -28,36 +28,32 @@ class VideoStream:
             
         return frame
      
-    def process(self, detected, post_action):
+    def process(self, detected):
         if detected:
             hand = detected[0]
             fingers = self.detector.fingers_up(hand)
 
-            print(fingers)
+            print(fingers, "\n\n")
 
             x, y = hand['center']
-            flag = y <= self.cfg.thres_y and x >= self.cfg.width - self.cfg.thres_x
+            flag = y <= self.cfg.ty and x >= self.cfg.width - self.cfg.tx
             
-            if flag and post_action[1] > self.cfg.delay:
-                post_action = self.event.fingers(fingers, post_action)
-        return post_action
+            if flag:
+               self.td = self.event.execute(fingers, self.td)
 
     def main(self):
-        post_action = [False, self.cfg.delay+1]
         run = True
-
+        self.td = 0
+        
         while run:
             t1 = time.time()
             _, frame = self.capture.read()
             frame = cv.flip(frame, 1)
 
             detected, frame = self.detector.locate_hands(frame, flipType=False)
+            
             frame = self.overaly_field(frame)
-
-            post_action = self.process(detected, post_action)
-
-            post_action[1] += 1 if post_action[0] else 0
-            post_action[0] = False if post_action[1] > self.cfg.delay else post_action[0]
+            self.process(detected)
 
             t2 = time.time()
             fps = 1/float(t2-t1)

@@ -1,32 +1,38 @@
-import pyautogui
+import pyautogui as pag
 import logging
+from time import time
 
 class Handler:
     def __init__(self, config):
-        self.config = config
+        self.cfg = config
         
-        if self.config.logging:
-            logging.basicConfig(format=self.config.log_format, filename='logs.log',
-                                encoding='utf-8', level=logging.INFO, filemode=self.onfig.log_mode)
+        if self.cfg.logging:
+            logging.basicConfig(format=self.cfg.log_format, filename='logs.log',
+                                encoding='utf-8', level=logging.INFO, filemode=self.cfg.log_mode)
     
-    def fingers(self, fingers, post_action):
-        match fingers:
-            case [1, 0, 0, 0, 0]:
-                print('\033[91m{}\033[00m'.format(
-                    log := 'ACTION: Left'))
-                pyautogui.press('pageup')
+    def execute(self, fingers, timed, log=None):
+        offset = timed+self.cfg.delay
+        if  offset < time():
+            match fingers:
+                case [1, 0, 0, 0, 0]:
+                    print('\033[91m{}\033[00m'.format(
+                        log := 'ACTION: Left'))
+                    pag.press('left')
+                    td = time()
 
-            case [0, 0, 0, 0, 1]:
-                print('\033[91m{}\033[00m'.format(
-                    log := 'ACTION: Right'))
-                pyautogui.press('pagedown')
-                print('check')
-           
-            case _:
-                log = None
-                
-        if log is not None:
-            post_action = [True, 0]
-            logging.info(log) if self.config.logging else None
+                case [0, 0, 0, 0, 1]:
+                    print('\033[91m{}\033[00m'.format(
+                        log := 'ACTION: Right'))
+                    pag.press('right')
+                    td = time()
 
-        return post_action
+                case _:
+                    td = 0
+
+        else: 
+            td = timed
+
+        if log is not None and self.cfg.logging:
+            logging.info(log)
+        
+        return td

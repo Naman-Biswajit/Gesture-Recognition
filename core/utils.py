@@ -18,10 +18,10 @@ class Config:
     width: int = 1080
     height: int = 520
     field_opacity: float = 0.19
-    delay: int = 15
+    delay: int = 1
     camera_index: int = 0
-    thres_y: int = round(0.5*height)
-    thres_x: int = round(0.7*width)
+    ty: int = round(0.5*height)
+    tx: int = round(0.7*width)
     logging = False
     G_field: bool = True
     log_format: str = '%(asctime)s ~ %(levelname)s:%(message)s'
