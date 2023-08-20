@@ -132,3 +132,4 @@ dmypy.json
 # custom
 *.prof
 testing.py
+.vscode

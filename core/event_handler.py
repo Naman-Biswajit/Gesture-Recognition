@@ -3,6 +3,7 @@ import logging
 from time import time
 from numpy import interp
 
+
 class Handler:
     def __init__(self, config):
         self.cfg = config
@@ -16,14 +17,18 @@ class Handler:
         if len(lm_list) != 0:
             ix, iy = lm_list[8][1:]
             mx, my = lm_list[12][1:]
-            x = interp(ix, (self.cfg.x_offset, self.cfg.width-self.cfg.x_offset), (0, self.rx))
-            y = interp(iy, (self.cfg.y_offset, self.cfg.height-self.cfg.y_offset), (0, self.ry))
+            x = interp(ix, (self.cfg.x_offset, self.cfg.width -
+                       self.cfg.x_offset), (0, self.rx))
+            
+            y = interp(iy, (self.cfg.y_offset-70, self.cfg.height -
+                       self.cfg.y_offset-100), (0, self.ry))
 
             pag.moveTo(x, y, _pause=False)
-            
+            return x, y
+
     def execute(self, fingers, timed, log=None):
         offset = timed+self.cfg.delay
-        if  offset < time():
+        if offset < time():
             match fingers:
                 case [1, 0, 0, 0, 0]:
                     print('\033[91m{}\033[00m'.format(
@@ -40,10 +45,10 @@ class Handler:
                 case _:
                     td = 0
 
-        else: 
+        else:
             td = timed
 
         if log is not None and self.cfg.logging:
             logging.info(log)
-        
+
         return td

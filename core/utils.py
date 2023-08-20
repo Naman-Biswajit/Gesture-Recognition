@@ -1,5 +1,6 @@
 from dataclasses import dataclass, asdict
 
+
 @dataclass
 class Model:
     static_image_mode: bool = False,
@@ -30,5 +31,6 @@ class Config:
     x_offset: int = 100
     y_offset: int = 100
     even: int = 6
+
 
 fetch_asdict_model = lambda **kwargs: asdict(Model(**kwargs))

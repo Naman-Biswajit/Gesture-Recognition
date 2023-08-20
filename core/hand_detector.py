@@ -2,6 +2,7 @@ import cv2 as cv
 from .utils import fetch_asdict_model
 from mediapipe import solutions
 
+
 class Detector:
 
     def __init__(self, config):
@@ -41,7 +42,8 @@ class Detector:
                 ymin, ymax = min(y_list), max(y_list)
                 boxw, boxh = xmax - xmin, ymax - ymin
                 bbox = xmin, ymin, boxw, boxh
-                cx, cy = bbox[0] + round(bbox[2] / 2), bbox[1] + round(bbox[3] / 2)
+                cx, cy = bbox[0] + \
+                    round(bbox[2] / 2), bbox[1] + round(bbox[3] / 2)
 
                 _hand_['lm_list'] = _lm_list_
                 _hand_['bbox'] = bbox
