@@ -17,11 +17,11 @@ class Handler:
         if len(lm_list) != 0:
             ix, iy = lm_list[8][1:]
             mx, my = lm_list[12][1:]
-            x = interp(ix, (self.cfg.x_offset, self.cfg.width -
-                       self.cfg.x_offset), (0, self.rx))
+            x = interp(ix, (self.cfg.lof, self.cfg.width -
+                       self.cfg.rof), (0, self.rx))
             
-            y = interp(iy, (self.cfg.y_offset-70, self.cfg.height -
-                       self.cfg.y_offset-100), (0, self.ry))
+            y = interp(iy, (self.cfg.tof, self.cfg.height -
+                       self.cfg.dof), (0, self.ry))
 
             pag.moveTo(x, y, _pause=False)
             return x, y

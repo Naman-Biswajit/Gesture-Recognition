@@ -54,10 +54,11 @@ class VideoStream:
 
         if ix >= 0 and iy >= 0:
             cv.rectangle(frame,
-                         (self.cfg.x_offset, self.cfg.y_offset),
-                         (self.cfg.width-self.cfg.x_offset,
-                          self.cfg.height-self.cfg.y_offset),
-                          self.cfg.field_clr)
+                         (self.cfg.lof, self.cfg.tof),
+                         (self.cfg.width-self.cfg.rof,
+                          self.cfg.height-self.cfg.dof),
+                          self.cfg.rect_clr,
+                          self.cfg.thickness)
 
         return frame
 
