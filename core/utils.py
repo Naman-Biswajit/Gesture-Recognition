@@ -19,8 +19,9 @@ class Config:
     field_clr: tuple = (244, 168, 57)
     rect_clr: tuple = (66, 245, 72)
     thickness: int = 3
-    radii: int = 14
+    radii: int = 13
     circle_clr: tuple = (105, 78, 72)
+    mid_clr: tuple = (0, 127, 247)
 
     width: int = 640
     height: int = 480
@@ -29,7 +30,7 @@ class Config:
     camera_index: int = 0
     ty: int = round(0.5*height)
     tx: int = round(0.7*width)
-    even: int = 6
+    smooth: int = 7
 
     # Offsets
     tof: int = 20

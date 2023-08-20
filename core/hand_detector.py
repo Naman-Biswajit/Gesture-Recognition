@@ -1,13 +1,13 @@
 import cv2 as cv
 from .utils import fetch_asdict_model
 from mediapipe import solutions
-
+from math import hypot
 
 class Detector:
 
     def __init__(self, config):
         model = fetch_asdict_model()
-        self.config = config
+        self.cfg = config
         self.mp_hands = solutions.hands
         self.hands = self.mp_hands.Hands(**model)
         self.mp_draw = solutions.drawing_utils
@@ -68,9 +68,9 @@ class Detector:
                     cv.rectangle(frame, (bbox[0] - 20, bbox[1] - 20),
                                  (bbox[0] + bbox[2] + 20,
                                   bbox[1] + bbox[3] + 20),
-                                 self.config._bx_, 2)
+                                 self.cfg._bx_, 2)
                     cv.putText(frame, _hand_['type'], (bbox[0] - 30, bbox[1] - 30), cv.FONT_HERSHEY_SIMPLEX,
-                               2, self.config._tx_, 3)
+                               2, self.cfg._tx_, 3)
 
         return all_hands, frame
 
@@ -110,18 +110,16 @@ class Detector:
         return lm_list
 
 
-"""    def find_distance(self, p1, p2, frame=None):
+    def distance(self, l1, l2, frame, lm_list, draw=True):
+        x1, y1 = lm_list[l1][1:]
+        x2, y2 = lm_list[l2][1:]
+        cx, cy = round((x1 + x2)/2), round((y1 + y2)/2)
 
-        x1, y1 = p1
-        x2, y2 = p2
-        cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
-        info = (x1, y1, x2, y2, cx, cy)
-        if frame is not None:
-            cv.circle(frame, (x1, y1), 15, self.config._cr_, cv.FILLED)
-            cv.circle(frame, (x2, y2), 15, self.config._cr_, cv.FILLED)
-            cv.line(frame, (x1, y1), (x2, y2), self.__ln__, 3)
-            cv.circle(frame, (cx, cy), 15, self.cr, cv.FILLED)
-            return length, info, frame
-        else:
-            return length, info
-"""
+        if draw:
+            cv.line(frame, (x1, y1), (x2, y2), self.cfg.circle_clr, self.cfg.thickness)
+            cv.circle(frame, (x1, y1), self.cfg.radii, self.cfg.circle_clr, cv.FILLED)
+            cv.circle(frame, (x2, y2), self.cfg.radii, self.cfg.circle_clr, cv.FILLED)
+            cv.circle(frame, (cx, cy), self.cfg.radii-8, self.cfg.mid_clr, cv.FILLED)
+        length = hypot(x2 - x1, y2 - y1)
+
+        return length, frame, [x1, y1, x2, y2, cx, cy]

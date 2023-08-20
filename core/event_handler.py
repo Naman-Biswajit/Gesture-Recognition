@@ -13,18 +13,31 @@ class Handler:
                                 encoding='utf-8', level=logging.INFO, filemode=self.cfg.log_mode)
         pag.FAILSAFE = False
 
-    def cursor(self, lm_list):
+    def cursor(self, lm_list, delta):
         if len(lm_list) != 0:
+            lx, ly = delta
             ix, iy = lm_list[8][1:]
             # mx, my = lm_list[12][1:]
-            x = interp(ix, (self.cfg.lof, self.cfg.width -
+            u = interp(ix, (self.cfg.lof, self.cfg.width -
                        self.cfg.rof), (0, self.rx))
-            
-            y = interp(iy, (self.cfg.tof, self.cfg.height -
+
+            v = interp(iy, (self.cfg.tof, self.cfg.height -
                        self.cfg.dof), (0, self.ry))
+
+            x = lx + (u-lx) / self.cfg.smooth
+            y = ly + (v-ly) / self.cfg.smooth
 
             pag.moveTo(x, y, _pause=False)
             return [x, y, ix, iy]
+
+    def click(self, detector, frame, lm_list):
+        if len(lm_list) != 0:
+            length, frame, _ = detector.distance(8, 12, frame, lm_list)
+            print(length)
+            if (length < 36):
+                pag.click(button="primary")
+
+        return frame
 
     def execute(self, fingers, timed, log=None):
         offset = timed+self.cfg.delay

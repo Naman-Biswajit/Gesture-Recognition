@@ -17,6 +17,8 @@ class VideoStream:
         self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.cfg.height)
         
         self.move = True
+        self.lx, self.ly = 0, 0
+        
         self.main()
 
     def overaly_field(self, frame):
@@ -43,12 +45,11 @@ class VideoStream:
             flag = y <= self.cfg.ty and x >= self.cfg.width - self.cfg.tx
 
             if self.move:
-                cordinates = self.event.cursor(lm_list)
+                delta = (self.lx, self.ly)
+                cordinates = self.event.cursor(lm_list, delta)
             
             elif flag:
                 self.td = self.event.execute(fingers, self.td, lm_list)
-
-
 
         return cordinates
 
@@ -76,10 +77,15 @@ class VideoStream:
             frame = cv.flip(frame, 1)
 
             detected, frame = self.detector.locate_hands(frame, flip=False)
-            lm_list = self.detector.position(frame)
             frame = self.overaly_field(frame) if self.move else frame
+
+            lm_list = self.detector.position(frame)
             cordinates = self.process(detected, lm_list)
             frame = self.generate_region(frame, cordinates)
+
+            self.lx, self.ly = cordinates[0], cordinates[1]
+            frame = self.event.click(self.detector, frame, lm_list)
+
 
             t2 = time.time()
             fps = 1/float(t2-t1)
@@ -94,7 +100,7 @@ class VideoStream:
                 self.capture.release()
                 cv.destroyAllWindows()
 
-            if cv.waitKey(2) == ord('m'):
+            if cv.waitKey(1) == ord('m'):
                 print('TOGGLE: Mouse Mode')
                 self.move = not self.move
 
