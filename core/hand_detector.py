@@ -20,7 +20,7 @@ class Detector:
         self.connection_drawing_spec = self.mp_draw.DrawingSpec(
             color=(0, 246, 255), thickness=4)
 
-    def locate_hands(self, frame, draw=True, flipType=True):
+    def locate_hands(self, frame, draw=True, flip=True):
         frame_RGB = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         self.results = self.hands.process(frame_RGB)
         all_hands = []
@@ -41,13 +41,13 @@ class Detector:
                 ymin, ymax = min(y_list), max(y_list)
                 boxw, boxh = xmax - xmin, ymax - ymin
                 bbox = xmin, ymin, boxw, boxh
-                cx, cy = bbox[0] + (bbox[2] // 2), bbox[1] + (bbox[3] // 2)
+                cx, cy = bbox[0] + round(bbox[2] / 2), bbox[1] + round(bbox[3] / 2)
 
                 _hand_['lm_list'] = _lm_list_
                 _hand_['bbox'] = bbox
                 _hand_['center'] = (cx, cy)
 
-                if flipType:
+                if flip:
                     if hand_type.classification[0].label == 'Right':
                         _hand_['type'] = 'Left'
                     else:
@@ -95,13 +95,13 @@ class Detector:
                     fingers.append(0)
         return fingers
 
-    def position(self, img, idx=0):
+    def position(self, frame, idx=0):
 
         lm_list = []
         if self.results.multi_hand_landmarks:
             hand = self.results.multi_hand_landmarks[idx]
             for id, lm in enumerate(hand.landmark):
-                h, w, c = img.shape
+                h, w, _ = frame.shape
                 cx, cy = int(lm.x * w), int(lm.y * h)
                 lm_list.append([id, cx, cy])
 

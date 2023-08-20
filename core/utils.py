@@ -15,8 +15,8 @@ class Config:
     _cr_: tuple = (52, 0, 199)
     _ln_: tuple = (144, 157, 42)
     field_clr: tuple = (244, 168, 57)
-    width: int = 1080
-    height: int = 520
+    width: int = 640
+    height: int = 480
     field_opacity: float = 0.19
     delay: int = 1
     camera_index: int = 0
@@ -28,7 +28,7 @@ class Config:
     log_mode: str = 'w+'
     field_toggle: bool = False
     x_offset: int = 100
-    x_offset: int = 100
+    y_offset: int = 100
     even: int = 6
 
 fetch_asdict_model = lambda **kwargs: asdict(Model(**kwargs))

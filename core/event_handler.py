@@ -1,15 +1,26 @@
 import pyautogui as pag
 import logging
 from time import time
+from numpy import interp
 
 class Handler:
     def __init__(self, config):
         self.cfg = config
-        
+        self.rx, self.ry = pag.size()
         if self.cfg.logging:
             logging.basicConfig(format=self.cfg.log_format, filename='logs.log',
                                 encoding='utf-8', level=logging.INFO, filemode=self.cfg.log_mode)
-    
+        pag.FAILSAFE = False
+
+    def cursor(self, lm_list):
+        if len(lm_list) != 0:
+            ix, iy = lm_list[8][1:]
+            mx, my = lm_list[12][1:]
+            x = interp(ix, (self.cfg.x_offset, self.cfg.width-self.cfg.x_offset), (0, self.rx))
+            y = interp(iy, (self.cfg.y_offset, self.cfg.height-self.cfg.y_offset), (0, self.ry))
+
+            pag.moveTo(x, y, _pause=False)
+            
     def execute(self, fingers, timed, log=None):
         offset = timed+self.cfg.delay
         if  offset < time():

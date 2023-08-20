@@ -28,18 +28,22 @@ class VideoStream:
             
         return frame
      
-    def process(self, detected):
+    def process(self, detected, lm_list):
+        move = True
         if detected:
             hand = detected[0]
             fingers = self.detector.fingers_up(hand)
 
-            print(fingers, "\n\n")
+            print(fingers)
 
             x, y = hand['center']
             flag = y <= self.cfg.ty and x >= self.cfg.width - self.cfg.tx
             
             if flag:
-               self.td = self.event.execute(fingers, self.td)
+               self.td = self.event.execute(fingers, self.td, lm_list)
+            
+            if move:
+                self.event.cursor(lm_list)
 
     def main(self):
         run = True
@@ -50,10 +54,10 @@ class VideoStream:
             _, frame = self.capture.read()
             frame = cv.flip(frame, 1)
 
-            detected, frame = self.detector.locate_hands(frame, flipType=False)
-            
+            detected, frame = self.detector.locate_hands(frame, flip=False)
+            lm_list = self.detector.position(frame)
             frame = self.overaly_field(frame)
-            self.process(detected)
+            self.process(detected, lm_list)
 
             t2 = time.time()
             fps = 1/float(t2-t1)
