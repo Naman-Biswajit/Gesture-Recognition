@@ -30,14 +30,18 @@ class Handler:
             pag.moveTo(x, y, _pause=False)
             return [x, y, ix, iy]
 
-    def click(self, detector, frame, lm_list):
-        if len(lm_list) != 0:
+    def click(self, detector, frame, lm_list, click_time):
+        offset = click_time+self.cfg.click_rate
+
+        if len(lm_list) != 0 and (t:=time()) > offset:
             length, frame, _ = detector.distance(8, 12, frame, lm_list)
+
             if (length < 30):
+                click_time = t
                 pag.click(button="primary")
                 print('MOUSE: CLICKED')
 
-        return frame
+        return frame, click_time
 
     def execute(self, fingers, timed, log=None):
         offset = timed+self.cfg.delay

@@ -18,7 +18,7 @@ class VideoStream:
         
         self.move = True
         self.lx, self.ly = 0, 0
-        
+        self.click_time = 0 # CLick Rater Timer
         self.main()
 
     def overaly_field(self, frame):
@@ -85,7 +85,7 @@ class VideoStream:
             if self.move and cordinates != []:
                 frame = self.generate_region(frame, cordinates)
                 self.lx, self.ly = cordinates[0], cordinates[1]
-                frame = self.event.click(self.detector, frame, lm_list)
+                frame, self.click_time = self.event.click(self.detector, frame, lm_list, self.click_time)
 
 
             t2 = time.time()
