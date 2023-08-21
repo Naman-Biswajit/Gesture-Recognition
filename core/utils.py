@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict
 @dataclass
 class Model:
     static_image_mode: bool = False,
-    max_num_hands: int = 1
+    max_num_hands: int = 100
     min_detection_confidence: float = 0.8
     min_tracking_confidence: float = 0.5
 
@@ -30,7 +30,8 @@ class Config:
     camera_index: int = 0
     ty: int = round(0.5*height)
     tx: int = round(0.7*width)
-    smooth: int = 7
+    sensitivity: float = 7
+    rate_limit = 0.8
 
     # Offsets
     tof: int = 20

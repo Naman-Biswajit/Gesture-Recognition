@@ -33,7 +33,7 @@ class VideoStream:
         return frame
 
     def process(self, detected, lm_list):
-        cordinates = [-100, -100, -100, -100]
+        cordinates = []
 
         if detected:
             hand = detected[0]
@@ -55,7 +55,7 @@ class VideoStream:
 
     def generate_region(self, frame, cord):
 
-        if cord[0] >= 0 and cord[1] >= 0:
+        if cord != []:
             cv.rectangle(frame,
                          (self.cfg.lof, self.cfg.tof),
                          (self.cfg.width-self.cfg.rof,
@@ -82,7 +82,7 @@ class VideoStream:
             lm_list = self.detector.position(frame)
             cordinates = self.process(detected, lm_list)
 
-            if self.move:
+            if self.move and cordinates != []:
                 frame = self.generate_region(frame, cordinates)
                 self.lx, self.ly = cordinates[0], cordinates[1]
                 frame = self.event.click(self.detector, frame, lm_list)

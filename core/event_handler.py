@@ -24,8 +24,8 @@ class Handler:
             v = interp(iy, (self.cfg.tof, self.cfg.height -
                        self.cfg.dof), (0, self.ry))
 
-            x = lx + (u-lx) / self.cfg.smooth
-            y = ly + (v-ly) / self.cfg.smooth
+            x = lx + (u-lx) / self.cfg.sensitivity
+            y = ly + (v-ly) / self.cfg.sensitivity
 
             pag.moveTo(x, y, _pause=False)
             return [x, y, ix, iy]
@@ -33,9 +33,9 @@ class Handler:
     def click(self, detector, frame, lm_list):
         if len(lm_list) != 0:
             length, frame, _ = detector.distance(8, 12, frame, lm_list)
-            if (length < 36):
+            if (length < 30):
                 pag.click(button="primary")
-                # print('MOUSE: CLICKED')
+                print('MOUSE: CLICKED')
 
         return frame
 
