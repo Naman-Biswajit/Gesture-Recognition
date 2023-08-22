@@ -13,9 +13,10 @@ class Handler:
     def __init__(self, config):
         self.cfg = config
         self.rx, self.ry = pag.size()
-        self.hold_time = 0
-        self.hold = False
 
+        self.hold_time, self.change_time = 0, 0
+        self.hold, self.change = False, False
+        
         if self.cfg.logging:
             logging.basicConfig(format=self.cfg.log_format, filename='logs.log',
                                 encoding='utf-8', level=logging.INFO, filemode=self.cfg.log_mode)
@@ -79,6 +80,21 @@ class Handler:
                 self.hold = False
                 
     
+    def change_mode(self, fingers, move):
+        match fingers:
+            case [1, 0, 1, 0, 1]:
+                if not self.change:
+                    self.change = True
+                    self.change_time = time()
+                
+                else:
+                    if self.cfg.change_thres + self.change_time < time():
+                        self.change = False
+                        self.change_time = 0
+                        print('MODE: CHANGED')
+                        move = not move
+        return move
+                    
     def execute(self, fingers, timed, log=None):
         offset = timed+self.cfg.delay
         if offset < time():

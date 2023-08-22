@@ -34,8 +34,8 @@ class Config:
     # Accessibility
     sensitivity: float = 7
     click_rate = 0.5 # (SECONDS)
-    # click_threshold: int = 30
-    hold_thres = 3
+    hold_thres: float = 3
+    change_thres: float = 4
 
     # Offsets
     tof: int = 20

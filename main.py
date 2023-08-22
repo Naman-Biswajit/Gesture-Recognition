@@ -52,6 +52,7 @@ class VideoStream:
                 self.td = self.event.execute(fingers, self.td, lm_list)
 
             self.event.hold_action(fingers)
+            self.move = self.event.change_mode(fingers, self.move)
 
         return cordinates
 
