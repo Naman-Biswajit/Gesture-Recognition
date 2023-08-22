@@ -30,9 +30,12 @@ class Config:
     camera_index: int = 0
     ty: int = round(0.5*height)
     tx: int = round(0.7*width)
+
+    # Accessibility
     sensitivity: float = 7
     click_rate = 0.5 # (SECONDS)
-    click_thresthold: int = 30
+    # click_threshold: int = 30
+    hold_thres = 3
 
     # Offsets
     tof: int = 20

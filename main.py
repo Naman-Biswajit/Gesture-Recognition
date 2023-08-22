@@ -16,7 +16,7 @@ class VideoStream:
         self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.cfg.width)
         self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.cfg.height)
         
-        self.move = True
+        self.move = False
         self.lx, self.ly = 0, 0
         self.click_time = 0 # CLick Rater Timer
         self.main()
@@ -50,6 +50,8 @@ class VideoStream:
             
             elif flag:
                 self.td = self.event.execute(fingers, self.td, lm_list)
+
+            self.event.hold_action(fingers)
 
         return cordinates
 
@@ -86,7 +88,6 @@ class VideoStream:
                 frame = self.generate_region(frame, cordinates)
                 self.lx, self.ly = cordinates[0], cordinates[1]
                 frame, self.click_time = self.event.click(self.detector, frame, lm_list, self.click_time)
-
 
             t2 = time.time()
             fps = 1/float(t2-t1)

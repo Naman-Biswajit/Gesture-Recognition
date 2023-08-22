@@ -1,23 +1,38 @@
+import os
+import sys
+import subprocess
 import pyautogui as pag
 import logging
+
 from time import time
 from numpy import interp
+
 
 
 class Handler:
     def __init__(self, config):
         self.cfg = config
         self.rx, self.ry = pag.size()
+        self.hold_time = 0
+        self.hold = False
+
         if self.cfg.logging:
             logging.basicConfig(format=self.cfg.log_format, filename='logs.log',
                                 encoding='utf-8', level=logging.INFO, filemode=self.cfg.log_mode)
         pag.FAILSAFE = False
 
+    def open_file(self, filename: str):
+        if sys.platform == "win32":
+            os.startfile(filename)
+
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, filename])
+    
     def cursor(self, lm_list, delta):
         if len(lm_list) != 0:
             lx, ly = delta
             ix, iy = lm_list[8][1:]
-            # mx, my = lm_list[12][1:]
             u = interp(ix, (self.cfg.lof, self.cfg.width -
                        self.cfg.rof), (0, self.rx))
 
@@ -42,7 +57,28 @@ class Handler:
                 print('MOUSE: CLICKED')
 
         return frame, click_time
+    
+    def hold_action(self, fingers):
+        match fingers:
+            case [1, 1, 1, 1, 0]:
+                if not self.hold:
+                    self.hold = True
+                    self.hold_time = time()
+                
+                else:
+                    if self.cfg.hold_thres + self.hold_time < time():
+                        files = os.listdir((path:='./imgs/'))
+                        
+                        filename = path+f if (f:='1.jpg') in files else files[0]
+                        self.open_file(filename)
+                        print('OPENED FILE')
+                        self.hold = False
+                        self.hold_time = 0
 
+            case _:
+                self.hold = False
+                
+    
     def execute(self, fingers, timed, log=None):
         offset = timed+self.cfg.delay
         if offset < time():
