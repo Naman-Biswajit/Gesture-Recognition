@@ -98,14 +98,10 @@ class VideoStream:
 
             cv.imshow('Camera View', frame)
 
-            # if cv.waitKey(1) == ord('q'):
-            #     run = False
-            #     self.capture.release()
-            #     cv.destroyAllWindows()
-
-            if cv.waitKey(1) == ord('m'):
-                print('TOGGLE: Mouse Mode')
-                self.move = not self.move
+            if cv.waitKey(1) == ord('q'):
+                run = False
+                self.capture.release()
+                cv.destroyAllWindows()
 
 if __name__ == '__main__':
     VideoStream()
