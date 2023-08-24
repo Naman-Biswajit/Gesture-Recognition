@@ -4,7 +4,7 @@ import subprocess
 import pyautogui as pag
 import logging
 
-from time import time
+from time import time, sleep
 from numpy import interp
 
 
@@ -29,7 +29,10 @@ class Handler:
         else:
             opener = "open" if sys.platform == "darwin" else "xdg-open"
             subprocess.call([opener, filename])
-    
+        
+        sleep(0.1)
+        pag.hotkey('winleft', 'left')
+
     def cursor(self, lm_list, delta):
         if len(lm_list) != 0:
             lx, ly = delta
