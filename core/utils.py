@@ -23,10 +23,10 @@ class Config:
     circle_clr: tuple = (105, 78, 72)
     mid_clr: tuple = (0, 127, 247)
 
-    width: int = 640
+    width: int = 848
     height: int = 480
     field_opacity: float = 0.19
-    delay: int = 1
+    delay: int = 1.5
     camera_index: int = 0
     ty: int = round(0.5*height)
     tx: int = round(0.7*width)

@@ -13,9 +13,10 @@ class VideoStream:
         self.detector = Detector(self.cfg)
 
         self.capture = cv.VideoCapture(self.cfg.camera_index)
-        self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.cfg.width)
-        self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.cfg.height)
-        
+        # self.capture.set(,  self.cfg.height)
+        # self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.cfg.width)
+        cv.namedWindow("Camera View", cv.WINDOW_NORMAL)
+                    
         self.move = False
         self.lx, self.ly = 0, 0
         self.click_time = 0 # CLick Rater Timer

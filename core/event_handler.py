@@ -70,7 +70,7 @@ class Handler:
                     if self.cfg.hold_thres + self.hold_time < time():
                         files = os.listdir((path:='./imgs/'))
                         
-                        filename = path+f if (f:='1.jpg') in files else files[0]
+                        filename = path+f if (f:='1.jpeg') in files else files[0]
                         self.open_file(filename)
                         print('OPENED FILE')
                         self.hold = False
