@@ -41,7 +41,7 @@ class Config:
     tof: int = 20
     dof: int = 200
     lof: int = 100
-    rof: int = 100
+    rof: int = 140
 
     # Optionals
     logging = False

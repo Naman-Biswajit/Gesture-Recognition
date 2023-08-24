@@ -13,7 +13,7 @@ class VideoStream:
         self.detector = Detector(self.cfg)
 
         self.capture = cv.VideoCapture(self.cfg.camera_index)
-        # self.capture.set(,  self.cfg.height)
+        # self.capture.set(cv.CAP_PROP_FRAME_HEIGHT,  self.cfg.height)
         # self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.cfg.width)
         cv.namedWindow("Camera View", cv.WINDOW_NORMAL)
                     
@@ -62,7 +62,7 @@ class VideoStream:
         if cord != []:
             cv.rectangle(frame,
                          (self.cfg.lof, self.cfg.tof),
-                         (self.cfg.width-self.cfg.rof,
+                         (self.cfg.width-self.cfg.rof-100,
                           self.cfg.height-self.cfg.dof),
                           self.cfg.rect_clr,
                           self.cfg.thickness)
